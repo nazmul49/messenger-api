@@ -3,7 +3,6 @@ import { ConfigModule, } from '@nestjs/config';
 
 import { SharedModule } from '@app/shared';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -15,6 +14,5 @@ import { AppService } from './app.service';
     SharedModule.registerRmq('PRESENCE_SERVICE', process.env.RABBITMQ_PRESENCE_QUEUE),
   ],
   controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
