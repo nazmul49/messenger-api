@@ -1,31 +1,31 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
-import { UserEntity } from './user.entity';
 import { NewUserDTO } from './dtos/new-user.dto';
 import { ExistingUserDTO } from './dtos/existing-user.dto';
+import { UserEntity, UserRepositoryInterface } from '@app/shared';
+import { AuthServiceInterface } from './interface/auth.service.interface';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements AuthServiceInterface {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    @Inject('UsersRepositoryInterface')
+    private readonly userRepository: UserRepositoryInterface,
     private readonly jwtService: JwtService,
   ) {}
 
-  async getUsers() {
-    return this.userRepository.find();
+  async getUsers(): Promise<UserEntity[]> {
+    return this.userRepository.findAll();
   }
 
   async findByEmail(email: string): Promise<UserEntity> {
-    return this.userRepository.findOne({
+    return this.userRepository.findByCondition({
       where: { email },
       select: ['id', 'firstName', 'lastName', 'email', 'password'],
     });
@@ -94,14 +94,14 @@ export class AuthService {
     return { token: jwt };
   }
 
-  async verifyJwt(jwt: string): Promise<{ exp: number }> {
+  async verifyJwt(jwt: string): Promise<{ user: UserEntity; exp: number }> {
     if (!jwt) {
       throw new UnauthorizedException();
     }
 
     try {
-      const { exp } = await this.jwtService.verifyAsync(jwt);
-      return { exp };
+      const { user, exp } = await this.jwtService.verifyAsync(jwt);
+      return { user, exp };
     } catch (error) {
       throw new UnauthorizedException();
     }
