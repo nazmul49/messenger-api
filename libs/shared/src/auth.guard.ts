@@ -11,8 +11,7 @@ import { catchError, Observable, of, switchMap } from 'rxjs';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    // @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
-     @Inject('AUTH_SERVICE') private authService: ClientProxy,
+    @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
   ) {}
 
   canActivate(
